@@ -3,8 +3,14 @@
 namespace App\Entity;
 
 use App\Repository\ReclamationRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+
+
+
 
 #[ORM\Entity(repositoryClass: ReclamationRepository::class)]
 class Reclamation
@@ -15,20 +21,38 @@ class Reclamation
     private ?int $id_reclamation = null;
 
 
+    
     #[ORM\Column(length: 50)]
+    #[Assert\Length(min: 3)]
     private ?string $titre_reclamation = null;
 
     #[ORM\Column(length: 100)]
+    // #[Assert\NotBlank(message:"Ce champ ne peut être vide")]
+    // #[Assert\Regex(pattern: "/^[A-Z]+$/i", message: "Doit commencer par la lettre majiscule", htmlPattern: "[A-Z]+")]
     private ?string $description_reclamation = null;
 
     #[ORM\Column(length: 25)]
     private ?string $type_reclamation = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Assert\GreaterThanOrEqual("today")]
     private ?\DateTimeInterface $date = null;
 
     #[ORM\Column(length: 10)]
     private ?string $etat_reclamation = null;
+
+    #[ORM\OneToMany(mappedBy: 'idReclamation', targetEntity: Reponse::class)]
+    private Collection $lesReponses;
+
+    
+
+    public function __construct()
+    {
+        $this->lesReponses = new ArrayCollection();
+    }
+
+    
+    
 
     
 
@@ -104,4 +128,52 @@ class Reclamation
 
         return $this;
     }
+
+    /**
+     * @return Collection<int, Reponse>
+     */
+    public function getLesReponses(): Collection
+    {
+        return $this->lesReponses;
+    }
+
+    public function addLesReponse(Reponse $lesReponse): self
+    {
+        if (!$this->lesReponses->contains($lesReponse)) {
+            $this->lesReponses->add($lesReponse);
+            $lesReponse->setIdReclamation($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLesReponse(Reponse $lesReponse): self
+    {
+        if ($this->lesReponses->removeElement($lesReponse)) {
+            // set the owning side to null (unless already changed)
+            if ($lesReponse->getIdReclamation() === $this) {
+                $lesReponse->setIdReclamation(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getIdPatient(): ?Patient
+    {
+        return $this->id_patient;
+    }
+
+    public function setIdPatient(?Patient $id_patient): self
+    {
+        $this->id_patient = $id_patient;
+
+        return $this;
+    }
+
+    
+
+    
+
+    
 }

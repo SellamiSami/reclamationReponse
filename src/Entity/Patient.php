@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\PatientRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -32,6 +34,14 @@ class Patient
     #[ORM\Column(length: 20)]
     #[Assert\NotBlank(message:"Ce champ ne peut être vide")]
     private ?string $motpasse = null;
+
+    #[ORM\OneToMany(mappedBy: 'id_patient', targetEntity: Reclamation::class)]
+    private Collection $reclamations;
+
+    public function __construct()
+    {
+        $this->reclamations = new ArrayCollection();
+    }
 
    /* public function getId(): ?int
     {
@@ -87,6 +97,36 @@ class Patient
     public function setMotPasse(string $motpasse): self
     {
         $this->motpasse = $motpasse;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Reclamation>
+     */
+    public function getReclamations(): Collection
+    {
+        return $this->reclamations;
+    }
+
+    public function addReclamation(Reclamation $reclamation): self
+    {
+        if (!$this->reclamations->contains($reclamation)) {
+            $this->reclamations->add($reclamation);
+            $reclamation->setIdPatient($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReclamation(Reclamation $reclamation): self
+    {
+        if ($this->reclamations->removeElement($reclamation)) {
+            // set the owning side to null (unless already changed)
+            if ($reclamation->getIdPatient() === $this) {
+                $reclamation->setIdPatient(null);
+            }
+        }
 
         return $this;
     }

@@ -20,6 +20,11 @@ class Reponse
     #[ORM\Column(length: 100)]
     private ?string $solution_reponse = null;
 
+    // #[ORM\ManyToOne(inversedBy: 'lesReponses')]
+    // private ?Reclamation $idReclamation = null;
+
+    
+
     public function getId(): ?int
     {
         return $this->id;
@@ -60,4 +65,18 @@ class Reponse
 
         return $this;
     }
+
+    public function getIdReclamation(): ?Reclamation
+    {
+        return $this->idReclamation;
+    }
+
+    public function setIdReclamation(?Reclamation $idReclamation): self
+    {
+        $this->idReclamation = $idReclamation;
+
+        return $this;
+    }
+
+    
 }
